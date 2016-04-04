@@ -73,7 +73,7 @@ export default {
         setTimeout(() => {
           this.map.invalidateSize();
           this.map.setView(this.info[0].coords);
-        }, 0);
+        }, 350);
       } else {
         this.map.setView(this.info[0].coords);
       }
