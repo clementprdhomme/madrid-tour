@@ -3,31 +3,48 @@
     <div class="splash" v-if="initialState"><p>Touchez un marqueur</p></div>
     <div v-else transition="offset">
       <h1 class="title">{{poi.name}}</h1>
-      <div class="card" v-if="displayCard">
-        <ul class="tabs" v-if="poi.opening_hours">
-          <li class="-active">Aujourd'hui</li>
-          <li v-for="day in this.week()">{{day | truncate 1}}</li>
-        </ul>
-      </div>
+      <card v-if="poi.opening_hours">
+        <tabs v-if="poi.opening_hours"
+              :list="this.week()"
+              :active.sync="activeTab">
+        </tabs>
+          <div class="content">
+            <timeline :configuration="timelineData"></timeline>
+          </div>
+      </card>
     </div>
   </div>
 </template>
 
 <script>
 import store from '../vuex/store.js';
+import Card from './card.vue';
+import Tabs from './tabs.vue';
+import Timeline from './timeline.vue';
 
 export default {
 
   store,
 
+  components: {
+    card: Card,
+    tabs: Tabs,
+    timeline: Timeline
+  },
+
   data() {
     return {
+      today: (new Date()).getDay(),
+      currentTime: 0,
       week() {
-        const today = (new Date()).getDay(); /* 0 = Sunday */
-        const names = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi',
-          'Vendredi', 'Samedi'];
-        return names.slice(today + 1).concat(names.slice(0, today));
-      }
+        const names = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+
+        let res = names.slice(this.today + 1).concat(names.slice(0, this.today));
+        res = ['Auj.'].concat(res);
+
+        return res;
+      },
+      activeTab: 'X'
     };
   },
 
@@ -40,7 +57,89 @@ export default {
   computed: {
     initialState() { return !this.info.length; },
     poi() { return this.info.length ? this.info[0]: {}; },
-    displayCard() { return this.poi.opening_hours; }
+    selectedDay() {
+      if(this.activeTab === 'Auj.') return this.today;
+      return ['D', 'L', 'M', 'X', 'J', 'V', 'S'].indexOf(this.activeTab);
+    },
+    openingHours() { return this.poi.opening_hours[this.selectedDay]; },
+    prices() {
+      if(!this.poi.prices) return;
+      if(!this.poi.prices.rates) return this.poi.prices;
+      return this.poi.prices.rates.map(function(rate) {
+        if(rate.default) return rate;
+        return {
+          name: rate.name,
+          amount: rate.amount,
+          periods: rate.periods && rate.periods[this.selectedDay]
+        };
+      }.bind(this));
+    },
+    timelineData() {
+      const data = [];
+      const pricesColorScale = ['#078D07', '#0AD20A', '#8FFA8F'];
+      const getColor = index => pricesColorScale[index % 3];
+
+      /* By default, the whole timeline is greyed */
+      data.push({
+        color: '#D6D6D6',
+        ranges: [
+          [0, 100]
+        ]
+      });
+
+      /* true if all the prices are not based on hours */
+      const notHourBasedPrices = !this.prices.filter(price => price.periods).length;
+
+      if(!this.prices || this.prices.always_free || notHourBasedPrices) {
+        /* We add the opening hours data */
+        const openingHoursData = {
+          color: '#0AD20A',
+          ranges: []
+        };
+        for(let i = 0, j = this.openingHours.length; i < j; i++) {
+          openingHoursData.ranges.push(this.openingHours[i]);
+        }
+        data.push(openingHoursData);
+      } else {
+        /* Hour based prices or the default one */
+        const hourBasedPrices = this.prices.filter(price => price.periods || price.default);
+        /* We add the detailed prices to the timeline */
+        for(let i = 0, j = hourBasedPrices.length; i < j; i++) {
+          if(hourBasedPrices[i].default) {
+            const defaultPrice = {
+              color: hourBasedPrices.length === 1 ? '#0AD20A' : getColor(i),
+              ranges: []
+            };
+            for(let i = 0, j = this.openingHours.length; i < j; i++) {
+              defaultPrice.ranges.push(this.openingHours[i]);
+            }
+            data.push(defaultPrice);
+          } else {
+            data.push({
+              color: getColor(i),
+              ranges: hourBasedPrices[i].periods
+            })
+          }
+        }
+      }
+
+      return data;
+    }
+  },
+
+  ready() {
+    this.setCurrentTime();
+  },
+
+  methods: {
+    /* We set the current time every minute */
+    setCurrentTime() {
+      setInterval(() => {
+        const date = new Date();
+        this.currentTime = date.getHours() + date.getMinutes() / 60;
+      }, 60 * 1000);
+    }
+
   }
 
 }
@@ -91,19 +190,8 @@ export default {
       color: $color-2;
     }
 
-    .card {
-      box-shadow: 0 1px 3px 1px rgba($color-2, .2);
-      border-radius: 3px;
-      padding: 15px;
-
-      > .tabs {
-        margin: 0;
-        padding: 0;
-        list-style-type: none;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
+    .tabs {
+      margin-bottom: 15px;
     }
   }
 </style>
