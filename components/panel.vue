@@ -9,7 +9,7 @@
               :active.sync="activeTab">
         </tabs>
           <div class="content">
-            <timeline :configuration="timelineData"></timeline>
+            <timeline :configuration="timelineData" :timecursor="selectedDay === today"></timeline>
           </div>
       </card>
     </div>
@@ -35,7 +35,6 @@ export default {
   data() {
     return {
       today: (new Date()).getDay(),
-      currentTime: 0,
       week() {
         const names = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
 
@@ -44,7 +43,7 @@ export default {
 
         return res;
       },
-      activeTab: 'X'
+      activeTab: 'Auj.'
     };
   },
 
@@ -125,21 +124,6 @@ export default {
 
       return data;
     }
-  },
-
-  ready() {
-    this.setCurrentTime();
-  },
-
-  methods: {
-    /* We set the current time every minute */
-    setCurrentTime() {
-      setInterval(() => {
-        const date = new Date();
-        this.currentTime = date.getHours() + date.getMinutes() / 60;
-      }, 60 * 1000);
-    }
-
   }
 
 }
