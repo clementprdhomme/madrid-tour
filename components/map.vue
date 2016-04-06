@@ -54,7 +54,7 @@ export default {
           html: `<svg><use xlink:href="${iconId}"></use>'}}/></svg>`,
           iconSize: [20, 20],
           iconAnchor: [10, 10],
-          className: marker.category
+          className: `icon-${marker.category}`
         });
 
         return L.marker(marker.coords, {icon, ref: marker.name})
@@ -84,7 +84,7 @@ export default {
 </script>
 
 <style>
-  @import "../css/settings.css";
+  @import "../css/icons.css";
 
   .leaflet-marker-icon {
     cursor: pointer;
@@ -93,9 +93,6 @@ export default {
       width: 20px;
       height: 20px;
     }
-
-    &.museum use { fill: $color-5; }
-    &.housing use { fill: $color-6; }
 
   }
 

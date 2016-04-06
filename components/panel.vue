@@ -2,10 +2,18 @@
   <div :class="['panel', !initialState ? '-expanded' : '']">
     <div class="splash" v-if="initialState"><p>Touchez un marqueur</p></div>
     <div v-else transition="offset">
+      <div :class="['poi-icon', 'icon-' + poi.category, '-border']">
+        <svg :class="'icon-' + poi.category">
+          <use :xlink:href="poiIcon"></use>'}}/>
+        </svg>
+      </div>
       <h1 class="title">{{poi.name}}</h1>
-      <card v-if="poi.opening_hours">
-        <tabs v-if="poi.opening_hours"
-              :list="this.week()"
+      <h2 class="subtitle">
+        <span class="highlight">{{poi.isOpened ? 'Ouvert' : 'Fermé'}}</span>
+        {{activeRatesListName ? '- ' + activeRatesListName : ''}}
+      </h2>
+      <card v-if="poi.openingHours">
+        <tabs :list="this.week()"
               :active.sync="activeTab">
         </tabs>
           <div class="content">
@@ -13,15 +21,22 @@
             <div class="row">
               <div class="col"><h2 class="title -small">Ouverture</h2></div>
               <div class="col">
-                <div v-for="range in openingHours">
+                <div v-for="range in poi.getOpeningHoursFor(this.selectedDay)">
                   {{this.prettyHour(range[0])}}-{{this.prettyHour(range[1])}}
                 </div>
               </div>
             </div>
             <h2 class="title -separator">Tarifs</h2>
             <div class="row"
-                 v-for="rate in poi.prices.rates">
-              <div class="col"><h2 class="title -small">{{rate.name}}</h2></div>
+                 v-for="rate in poi.getRatesFor(this.selectedDay, false)">
+              <div class="col">
+                <h2 class="title -small">
+                  <span class="bullet"
+                        :style="'background-color: ' + this.ratesScale($index) + ';'"
+                  ></span>
+                  {{rate.name}}
+                </h2>
+              </div>
               <div class="col">
                 <div>{{rate.amount}}</div>
               </div>
@@ -34,13 +49,12 @@
 
 <script>
 import store from '../vuex/store.js';
-import { pad } from '../helpers/utils.js';
+import { prettyHour } from '../helpers/utils.js';
+import { green, greenScale } from '../helpers/colors.js';
 import Card from './card.vue';
 import Tabs from './tabs.vue';
 import Timeline from './timeline.vue';
-
-const pricesColorScale = ['#078D07', '#0AD20A', '#8FFA8F'];
-const getColor = index => pricesColorScale[index % 3];
+import PoiCollection from '../helpers/poi_collection.js';
 
 export default {
 
@@ -69,29 +83,19 @@ export default {
 
   vuex: {
     getters: {
-      info: state => state.poi.filter(poi => poi.name === state.activeMarker)
+      poi: state => state.activeMarker ?
+        (new PoiCollection(state.poi)).models.filter(poi => {
+          return poi.name === state.activeMarker;
+        })[0] :
+        null
     }
   },
 
   computed: {
-    initialState() { return !this.info.length; },
-    poi() { return this.info.length ? this.info[0]: {}; },
+    initialState() { return !this.poi; },
     selectedDay() {
       if(this.activeTab === 'Auj.') return this.today;
       return ['D', 'L', 'M', 'X', 'J', 'V', 'S'].indexOf(this.activeTab);
-    },
-    openingHours() { return this.poi.opening_hours[this.selectedDay]; },
-    prices() {
-      if(!this.poi.prices) return;
-      if(!this.poi.prices.rates) return this.poi.prices;
-      return this.poi.prices.rates.map(function(rate) {
-        if(rate.default) return rate;
-        return {
-          name: rate.name,
-          amount: rate.amount,
-          periods: rate.periods && rate.periods[this.selectedDay]
-        };
-      }.bind(this));
     },
     timelineData() {
       const data = [];
@@ -104,53 +108,44 @@ export default {
         ]
       });
 
-      /* true if all the prices are not based on hours */
-      const notHourBasedPrices = !this.prices.filter(price => price.periods).length;
+      const allRatesNonHourBased = !this.poi.getRatesFor(this.selectedDay, false).length;
 
-      if(!this.prices || this.prices.always_free || notHourBasedPrices) {
+      if(this.poi.alwaysFree || allRatesNonHourBased) {
         /* We add the opening hours data */
         const openingHoursData = {
-          color: '#0AD20A',
+          color: green,
           ranges: []
         };
-        for(let i = 0, j = this.openingHours.length; i < j; i++) {
+        for(let i = 0, j = this.poi.openingHours.length; i < j; i++) {
           openingHoursData.ranges.push(this.openingHours[i]);
         }
         data.push(openingHoursData);
       } else {
-        /* Hour based prices or the default one */
-        const hourBasedPrices = this.prices.filter(price => price.periods || price.default);
+        /* Hour based prices */
+        const hourBasedPrices = this.poi.getRatesFor(this.selectedDay, false);
+
         /* We add the detailed prices to the timeline */
         for(let i = 0, j = hourBasedPrices.length; i < j; i++) {
-          if(hourBasedPrices[i].default) {
-            const defaultPrice = {
-              color: hourBasedPrices.length === 1 ? '#0AD20A' : getColor(i),
-              ranges: []
-            };
-            for(let i = 0, j = this.openingHours.length; i < j; i++) {
-              defaultPrice.ranges.push(this.openingHours[i]);
-            }
-            data.push(defaultPrice);
-          } else {
-            data.push({
-              color: getColor(i),
-              ranges: hourBasedPrices[i].periods
-            })
-          }
+          data.push({
+            color: greenScale[i % greenScale.length],
+            ranges: hourBasedPrices[i].periods
+          })
         }
       }
 
       return data;
+    },
+    activeRatesListName() {
+      return this.poi.activeHourBasedRates.map(rate => rate.name).join(', ');
+    },
+    poiIcon() {
+      return require(`../imgs/icons/${this.poi.category}.svg`);
     }
   },
 
   methods: {
-    /* Convert 12.5 to 12h30 */
-    prettyHour(hour) {
-      const hours = Math.floor(hour);
-      const minutes = Math.floor((hour - Math.floor(hour)) * 60);
-      return pad(hours, 2, '0') + 'h' + (minutes ? pad(minutes, 2, '0') : '');
-    }
+    prettyHour,
+    ratesScale: i => greenScale[i % greenScale.length]
   }
 
 }
@@ -158,6 +153,7 @@ export default {
 
 <style>
   @import "../css/settings.css";
+  @import "../css/icons.css";
 
   .panel {
     background-color: $color-1;
@@ -195,7 +191,7 @@ export default {
     }
 
     .title {
-      margin-top: 0;
+      margin: 0;
       font-family: $font-1;
       font-size: 22px;
       font-weight: 500;
@@ -212,11 +208,24 @@ export default {
 
       &.-separator {
         margin-top: 15px;
-        margin-bottom: 5px;
+        margin-bottom: 10px;
         padding-bottom: 2px;
         border-bottom: 1px solid rgba($color-2, 0.1);
         font-size: 19px;
         font-weight: 500;
+      }
+    }
+
+    .subtitle {
+      font-size: 15px;
+      font-weight: 500;
+      color: $color-3;
+      margin-top: 2px;
+      margin-bottom: 20px;
+
+      > .highlight {
+        font-weight: 700;
+        color: $color-7;
       }
     }
 
@@ -226,6 +235,32 @@ export default {
 
     .timeline {
       margin-bottom: 15px;
+    }
+
+    .bullet {
+      display: inline-block;
+      height: 8px;
+      width: 8px;
+      border-radius: 100%;
+      margin-right: 5px;
+    }
+
+    .poi-icon {
+      width: 50px;
+      height: 50px;
+      margin-right: 10px;
+      float: left;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-width: 2px;
+      border-style: solid;
+      border-radius: 100%;
+
+      > svg {
+        width: 30px;
+        height: 30px;
+      }
     }
   }
 </style>

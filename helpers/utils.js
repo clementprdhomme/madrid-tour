@@ -18,3 +18,10 @@ export function pad(number, times, char) {
 	while(str.length < times) str = char + str;
 	return str;
 };
+
+/* Convert 12.5 to 12h30 */
+export function prettyHour(hour) {
+	const hours = Math.floor(hour);
+	const minutes = Math.floor((hour - Math.floor(hour)) * 60);
+	return pad(hours, 2, '0') + 'h' + (minutes ? pad(minutes, 2, '0') : '');
+}
