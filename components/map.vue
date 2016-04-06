@@ -41,7 +41,7 @@ export default {
         zoomControl: false
       });
 
-      L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png')
+      L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png')
         .addTo(this.map);
 
       L.control.zoom({position: 'topright'}).addTo(this.map);
@@ -73,7 +73,7 @@ export default {
         setTimeout(() => {
           this.map.invalidateSize();
           this.map.setView(this.info[0].coords);
-        }, 350);
+        }, 500);
       } else {
         this.map.setView(this.info[0].coords);
       }

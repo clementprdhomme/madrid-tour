@@ -20,6 +20,16 @@
 
     > .content {
       padding: 0 15px;
+
+      > .row {
+        display: flex;
+        justify-content: flex-start;
+
+        > .col {
+          margin-right: 10px;
+          &:last-of-type { margin-right: 0; }
+        }
+      }
     }
   }
 </style>

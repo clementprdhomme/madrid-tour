@@ -80,7 +80,7 @@ export default {
 
   .timeline {
     width: 100%;
-    height: 21px;
+    height: 22px;
 
     .tick {
       > line { stroke: #D6D6D6; }

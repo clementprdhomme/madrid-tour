@@ -52,7 +52,7 @@ export default {
       transition-timing-function: ease-in-out;
 
       &.-expanded {
-        height: calc(100vh - 200px);
+        height: calc(100% - 200px);
       }
     }
   }

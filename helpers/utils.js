@@ -12,3 +12,9 @@ export function debounce(func, wait, immediate) {
 		if (callNow) func.apply(context, args);
 	};
 };
+
+export function pad(number, times, char) {
+	let str = number + '';
+	while(str.length < times) str = char + str;
+	return str;
+};

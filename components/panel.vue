@@ -10,6 +10,22 @@
         </tabs>
           <div class="content">
             <timeline :configuration="timelineData" :timecursor="selectedDay === today"></timeline>
+            <div class="row">
+              <div class="col"><h2 class="title -small">Ouverture</h2></div>
+              <div class="col">
+                <div v-for="range in openingHours">
+                  {{this.prettyHour(range[0])}}-{{this.prettyHour(range[1])}}
+                </div>
+              </div>
+            </div>
+            <h2 class="title -separator">Tarifs</h2>
+            <div class="row"
+                 v-for="rate in poi.prices.rates">
+              <div class="col"><h2 class="title -small">{{rate.name}}</h2></div>
+              <div class="col">
+                <div>{{rate.amount}}</div>
+              </div>
+            </div>
           </div>
       </card>
     </div>
@@ -18,9 +34,13 @@
 
 <script>
 import store from '../vuex/store.js';
+import { pad } from '../helpers/utils.js';
 import Card from './card.vue';
 import Tabs from './tabs.vue';
 import Timeline from './timeline.vue';
+
+const pricesColorScale = ['#078D07', '#0AD20A', '#8FFA8F'];
+const getColor = index => pricesColorScale[index % 3];
 
 export default {
 
@@ -75,8 +95,6 @@ export default {
     },
     timelineData() {
       const data = [];
-      const pricesColorScale = ['#078D07', '#0AD20A', '#8FFA8F'];
-      const getColor = index => pricesColorScale[index % 3];
 
       /* By default, the whole timeline is greyed */
       data.push({
@@ -124,6 +142,15 @@ export default {
 
       return data;
     }
+  },
+
+  methods: {
+    /* Convert 12.5 to 12h30 */
+    prettyHour(hour) {
+      const hours = Math.floor(hour);
+      const minutes = Math.floor((hour - Math.floor(hour)) * 60);
+      return pad(hours, 2, '0') + 'h' + (minutes ? pad(minutes, 2, '0') : '');
+    }
   }
 
 }
@@ -137,6 +164,7 @@ export default {
     box-shadow: 0 -2px 10px 1px rgba($color-2, .2);
     font-family: $font-1;
     color: $color-2;
+    font-size: 15px;
     padding: 15px;
 
     > .splash {
@@ -172,9 +200,31 @@ export default {
       font-size: 22px;
       font-weight: 500;
       color: $color-2;
+
+      &.-small {
+        color: $color-8;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 2;
+        text-transform: uppercase;
+        margin-bottom: 0;
+      }
+
+      &.-separator {
+        margin-top: 15px;
+        margin-bottom: 5px;
+        padding-bottom: 2px;
+        border-bottom: 1px solid rgba($color-2, 0.1);
+        font-size: 19px;
+        font-weight: 500;
+      }
     }
 
     .tabs {
+      margin-bottom: 15px;
+    }
+
+    .timeline {
       margin-bottom: 15px;
     }
   }
