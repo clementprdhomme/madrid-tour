@@ -6,6 +6,7 @@
 <script>
 import store from '../vuex/store.js';
 import { updateActiveMarker } from '../vuex/actions'
+import { debounce } from '../helpers/utils';
 
 export default {
 
@@ -20,6 +21,7 @@ export default {
   ready() {
     this.createMap();
     this.addMarkers();
+    this.addPositionMarker();
   },
 
   vuex: {
@@ -64,6 +66,19 @@ export default {
       this.markerLayer = L.layerGroup(leafletMarkers).addTo(this.map);
     },
 
+    addPositionMarker() {
+      if(!!navigator.geolocation) {
+        const success = debounce(this.positionOnUpdate, 5000, true).bind(this);
+        navigator.geolocation.watchPosition(success,
+          () => {},
+          {
+            enableHighAccuracy: true,
+            maximumAge        : 30000,
+            timeout           : 27000
+          });
+      }
+    },
+
     markerOnClick(e) {
       const ref = e.target.options.ref;
       this.setActiveMarker(ref);
@@ -82,6 +97,24 @@ export default {
       } else {
         this.map.setView(this.info[0].coords);
       }
+    },
+
+    positionOnUpdate({ coords: position }) {
+      const coords = [ position.latitude, position.longitude ];
+
+      if(!this.positionMarker) {
+        const icon = L.divIcon({
+          html: `<div></div>`,
+          className: 'position-marker'
+        });
+        this.positionMarkerAccuracy = L.circle(coords, position.accuracy, { className: 'position-marker-accuracy'})
+          .addTo(this.map);
+        this.positionMarker = L.marker(coords, { icon })
+          .addTo(this.map);
+      } else {
+        this.positionMarkerAccuracy.setLatLng(coords);
+        this.positionMarker.setLatLng(coords);
+      }
     }
 
   }
@@ -91,14 +124,46 @@ export default {
 <style>
   @import "../css/icons.css";
 
-  .leaflet-marker-icon {
-    cursor: pointer;
+  .map {
+    .leaflet-marker-icon {
+      cursor: pointer;
 
-    > svg {
-      width: 20px;
-      height: 20px;
+      > svg {
+        width: 20px;
+        height: 20px;
+      }
+
     }
 
+    .position-marker {
+      width: 20px;
+      height: 20px;
+      transform: translate(-50%, -50%);
+      border-radius: 100%;
+      background-color: $color-7;
+    }
+
+    .position-marker-accuracy {
+      fill: rgba($color-7, .9);
+      stroke-width: 0;
+      animation-name: contract;
+      animation-duration: 2s;
+      animation-iteration-count: infinite;
+      animation-timing-function: ease-in-out;
+      transform-origin: center;
+    }
+  }
+
+  @keyframes contract {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(.8); }
+    100% { transform: scale(1); }
+  }
+
+  @-webkit-keyframes contract {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(.8); }
+    100% { transform: scale(1); }
   }
 
 </style>
