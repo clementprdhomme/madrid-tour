@@ -2,9 +2,9 @@
 
 .icon-museum {
   &.-border { border-color: $color-5; }
-  > use { fill: $color-5; }
+  use { fill: $color-5; }
 }
 .icon-housing {
   &.-border { border-color: $color-6; }
-  > use { fill: $color-6; }
+  use { fill: $color-6; }
 }

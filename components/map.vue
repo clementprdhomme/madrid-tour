@@ -51,7 +51,7 @@ export default {
       const leafletMarkers = this.markers.map((marker) => {
         const iconId = require(`../imgs/icons/${marker.category}.svg`);
         const icon = L.divIcon({
-          html: `<svg><use xlink:href="${iconId}"></use>'}}/></svg>`,
+          html: `<svg><use xlink:href="${iconId}"></use></svg>`,
           iconSize: [20, 20],
           iconAnchor: [10, 10],
           className: `icon-${marker.category}`
