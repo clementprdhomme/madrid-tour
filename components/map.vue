@@ -1,5 +1,5 @@
 <template>
-  <div :class="['map', defaultMapSize ? '' : '-reduced']">
+  <div class="map">
   </div>
 </template>
 
@@ -70,7 +70,12 @@ export default {
 
       if(this.defaultMapSize) {
         this.defaultMapSize = false;
+        /* We delay by 500ms to make sure the 300ms of the panel is done */
         setTimeout(() => {
+          /* We can't use Vue to add dynamically the class because the DOM
+           * update is asynchronous and we need the change now to invalidate the
+           * map's size */
+          this.$el.classList.add('-reduced');
           this.map.invalidateSize();
           this.map.setView(this.info[0].coords);
         }, 500);
