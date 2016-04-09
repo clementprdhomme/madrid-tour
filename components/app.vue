@@ -31,7 +31,7 @@ export default {
 
   #app {
     > .map {
-      height: 100%;
+      height: calc(100% - 80px);
       width: 100%;
       z-index: 0;
 
@@ -43,12 +43,14 @@ export default {
     > .panel {
       width: 100%;
       height: 80px;
-      position: fixed;
+      position: absolute;
       bottom: 0;
       left: 0;
       z-index: 1;
       transition: height .3s;
       transition-timing-function: ease-in-out;
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
 
       &.-expanded {
         height: calc(100% - 200px);
