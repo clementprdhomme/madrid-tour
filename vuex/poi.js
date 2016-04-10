@@ -5,6 +5,7 @@ export default [
     name: 'Musée du Prado',
     category: 'museum',
     coords: [40.4138, -3.6921],
+    link: 'https://www.museodelprado.es',
     opening_hours: [
       [[10, 19]],
       [[10, 20]],

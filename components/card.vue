@@ -17,6 +17,7 @@
     box-shadow:0 1px 1px 1px rgba($color-2, .1);
     border-radius: 1px;
     padding-bottom: 15px;
+    margin-bottom: 20px;
 
     > .content {
       padding: 0 15px;

@@ -7,6 +7,7 @@ export default class PoiModel {
   get name() { return this._rawData.name; }
   get category() { return this._rawData.category; }
   get coords() { return this._rawData.coords; }
+  get link() { return this._rawData.link; }
   get openingHours() { return this._rawData.opening_hours; }
   get todayOpeningHours() { return this._getOpeningHoursForToday(); }
   get isOpened() { return this.activeRates.length; }

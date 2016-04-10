@@ -46,6 +46,10 @@
             </div>
           </div>
       </card>
+      <template v-if="poi.link">
+        <h2 class="title -small">Site web</h2>
+        <a href="{{poi.link}}">{{poi.link}}</a>
+      </template>
       <a class="direction-button"
          href="citymapper://x-callback-url/directions?endcoord={{poi.coords[0]}}%2C{{poi.coords[1]}}&endname={{encodeURIComponent(poi.name)}}&x-source=Visite%20%C3%A0%20Madrid"
       >
@@ -263,6 +267,11 @@ export default {
         font-weight: 700;
         color: $color-7;
       }
+    }
+
+    a {
+      color: $color-2;
+      text-decoration: none;
     }
 
     .tabs {
