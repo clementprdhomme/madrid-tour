@@ -55,6 +55,31 @@ export default [
     name: 'Appartement de Clément',
     category: 'housing',
     coords: [40.433454, -3.698676]
-  }
+  },
+
+  {
+    name: 'Musée Reina Sofía',
+    category: 'museum',
+    coords: [40.4079123, -3.6945568999999523],
+    link: 'http://www.museoreinasofia.es',
+    opening_hours: [
+      [[10, 19]],
+      [[10, 21]],
+      [[0, 0]],
+      [[10, 21]],
+      [[10, 21]],
+      [[10, 21]],
+      [[10, 21]]
+    ],
+    prices: {
+      rates: [
+        {
+          name: 'Tarif général',
+          amount: '8€/pers.',
+          default: true
+        }
+      ]
+    }
+  },
 
 ];
