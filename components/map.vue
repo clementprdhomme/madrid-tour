@@ -22,12 +22,15 @@ export default {
     this.createMap();
     this.addMarkers();
     this.addPositionMarker();
+
+    store.watch('panelMinimized', this.updateMapSize);
   },
 
   vuex: {
     getters: {
       markers: (state) => state.poi,
-      info: state => state.poi.filter(poi => poi.name === state.activeMarker)
+      info: state => state.poi.filter(poi => poi.name === state.activeMarker),
+      panelMinimized: state => state.panelMinimized
     },
     actions: {
       setActiveMarker: updateActiveMarker
@@ -86,14 +89,7 @@ export default {
       if(this.defaultMapSize) {
         this.defaultMapSize = false;
         /* We delay by 500ms to make sure the 300ms of the panel is done */
-        setTimeout(() => {
-          /* We can't use Vue to add dynamically the class because the DOM
-           * update is asynchronous and we need the change now to invalidate the
-           * map's size */
-          this.$el.classList.add('-reduced');
-          this.map.invalidateSize();
-          this.map.setView(this.info[0].coords);
-        }, 500);
+        setTimeout(() => this.reduceMapSize(), 500);
       } else {
         this.map.setView(this.info[0].coords);
       }
@@ -114,6 +110,29 @@ export default {
       } else {
         this.positionMarkerAccuracy.setLatLng(coords);
         this.positionMarker.setLatLng(coords);
+      }
+    },
+
+    reduceMapSize() {
+      /* We can't use Vue to add dynamically the class because the DOM
+       * update is asynchronous and we need the change now to invalidate the
+       * map's size */
+      this.$el.classList.add('-reduced');
+      this.map.invalidateSize();
+      this.map.setView(this.info[0].coords);
+    },
+
+    expandMapSize() {
+      this.$el.classList.remove('-reduced');
+      this.map.invalidateSize();
+      this.map.setView(this.info[0].coords);
+    },
+
+    updateMapSize(isMinimized) {
+      if(isMinimized) {
+        this.expandMapSize();
+      } else {
+        this.reduceMapSize();
       }
     }
 

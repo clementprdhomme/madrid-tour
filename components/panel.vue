@@ -1,11 +1,14 @@
 <template>
-  <div :class="['panel', !initialState ? '-expanded' : '']">
+  <div :class="['panel', !initialState && !minimized ? '-expanded' : '']">
     <div class="splash" v-if="initialState"><p>Touchez un marqueur</p></div>
     <div v-else transition="offset">
       <div :class="['poi-icon', 'icon-' + poi.category, '-border']">
         <svg :class="'icon-' + poi.category">
           <use :xlink:href="poiIcon"></use>
         </svg>
+      </div>
+      <div :class="['reduce-button', minimized ? '-flipped' : '']"
+           @click="this.toggleMinimize()">
       </div>
       <h1 class="title">{{poi.name}}</h1>
       <h2 class="subtitle">
@@ -60,6 +63,7 @@
 
 <script>
 import store from '../vuex/store.js';
+import { togglePanelSize } from '../vuex/actions'
 import { prettyHour } from '../helpers/utils.js';
 import { green, greenScale } from '../helpers/colors.js';
 import Card from './card.vue';
@@ -88,7 +92,8 @@ export default {
 
         return res;
       },
-      activeTab: 'Auj.'
+      activeTab: 'Auj.',
+      minimized: false
     };
   },
 
@@ -99,6 +104,9 @@ export default {
           return poi.name === state.activeMarker;
         })[0] :
         null
+    },
+    actions: {
+      updatePanelSize: togglePanelSize
     }
   },
 
@@ -162,7 +170,18 @@ export default {
 
   methods: {
     prettyHour,
-    ratesScale: i => greenScale[i % greenScale.length]
+    ratesScale: i => greenScale[i % greenScale.length],
+    toggleMinimize() {
+      if(!this.minimized) {
+        this.updatePanelSize();
+        /* We delay by 500ms to make sure the 300ms of animation of the panel is
+         * finished */
+        setTimeout(() => this.minimized = !this.minimized, 350);
+      } else {
+        this.minimized = !this.minimized;
+        setTimeout(() => this.updatePanelSize(), 350);
+      }
+    }
   }
 
 }
@@ -313,6 +332,19 @@ export default {
         width: 70px;
         vertical-align: bottom;
       }
+    }
+
+    .reduce-button {
+      position: absolute;
+      top: 0;
+      right: 2px;
+      width: 15px;
+      height: 15px;
+      border-top:  2px solid rgba($color-3, .3);
+      border-left: 2px solid rgba($color-3, .3);
+      transform: rotate(-135deg);
+
+      &.-flipped { transform: rotate(45deg) translate(15px, 15px); }
     }
   }
 </style>

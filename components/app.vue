@@ -52,9 +52,7 @@ export default {
       overflow-y: scroll;
       -webkit-overflow-scrolling: touch;
 
-      &.-expanded {
-        height: calc(100% - 200px);
-      }
+      &.-expanded { height: calc(100% - 200px); }
     }
   }
 </style>

@@ -7,12 +7,16 @@ Vue.use(Vuex);
 
 const state = {
   poi,
-  activeMarker: null
+  activeMarker: null,
+  panelMinimized: false
 };
 
 const mutations = {
   UPDATE_ACTIVE_MARKER(state, name) {
     state.activeMarker = name;
+  },
+  TOGGLE_PANEL_SIZE(state) {
+    state.panelMinimized = !state.panelMinimized;
   }
 };
 
