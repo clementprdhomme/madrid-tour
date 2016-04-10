@@ -4,7 +4,7 @@
     <div v-else transition="offset">
       <div :class="['poi-icon', 'icon-' + poi.category, '-border']">
         <svg :class="'icon-' + poi.category">
-          <use :xlink:href="poiIcon"></use>'}}/>
+          <use :xlink:href="poiIcon"></use>
         </svg>
       </div>
       <h1 class="title">{{poi.name}}</h1>
@@ -43,6 +43,17 @@
             </div>
           </div>
       </card>
+      <a class="direction-button"
+         href="citymapper://x-callback-url/directions?endcoord={{poi.coords[0]}}%2C{{poi.coords[1]}}&endname={{encodeURIComponent(poi.name)}}&x-source=Visite%20%C3%A0%20Madrid"
+      >
+        <svg class="icon">
+          <use :xlink:href="directionIcon"></use>
+        </svg>
+        Obtenir l'itinéraire
+      </a>
+      <div class="button-credits">
+        Avec <a href="https://citymapper.com"><svg class="icon"><use :xlink:href="citymapperIcon"></use></svg></a>
+      </div>
     </div>
   </div>
 </template>
@@ -140,6 +151,12 @@ export default {
     },
     poiIcon() {
       return require(`../imgs/icons/${this.poi.category}.svg`);
+    },
+    directionIcon() {
+      return require('../imgs/icons/direction.svg');
+    },
+    citymapperIcon() {
+      return require('../imgs/icons/citymapper.svg');
     }
   },
 
@@ -260,6 +277,41 @@ export default {
       > svg {
         width: 30px;
         height: 30px;
+      }
+    }
+
+    .direction-button {
+      display: block;
+      width: 100%;
+      margin-top: 20px;
+      padding: 10px 0;
+      text-align: center;
+      color: $color-1;
+      background-color: $color-7;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: .3px;
+
+      > .icon {
+        display: inline-block;
+        width: 15px;
+        height: 15px;
+        margin-right: 2px;
+
+        > use { fill: $color-1; }
+      }
+    }
+
+    .button-credits {
+      margin-top: 5px;
+      font-size: 12px;
+      color: $color-3;
+
+      .icon {
+        display: inline-block;
+        height: 12px;
+        width: 70px;
+        vertical-align: bottom;
       }
     }
   }
