@@ -50,6 +50,8 @@ export default {
     /* We're not able to add any other listener after that */
     window.onresize = debounce(() => this.width = this.$el.getBoundingClientRect().width, 50);
 
+    console.log(this.configuration);
+
     this.setCurrentTime();
   },
 

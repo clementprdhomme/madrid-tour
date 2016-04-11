@@ -10,9 +10,19 @@ export default class PoiModel {
   get link() { return this._rawData.link; }
   get openingHours() { return this._rawData.opening_hours; }
   get todayOpeningHours() { return this._getOpeningHoursForToday(); }
-  get isOpened() { return this.activeRates.length; }
+  get isOpened() {
+    if(this.activeRates.length) return true;
+
+    const today = (new Date()).getDay();
+    const currentHour = (new Date()).getHours() + (new Date()).getMinutes() / 60;
+    const openingHours = this.openingHours[today];
+
+    /* TODO: should take into account multiple arrays */
+    return openingHours && openingHours[0][0] <= currentHour &&
+      openingHours[0][1] > currentHour;
+  }
   get alwaysFree() { return this._rawData.prices.always_free; }
-  get rates() { return this._rawData.prices ? this._rawData.prices.rates : []; };
+  get rates() { return this._rawData.prices && this._rawData.prices.rates ? this._rawData.prices.rates : []; };
   get todayRates() { return this._getRatesForToday(true); }
   get todayHourBasedRates() { return this._getRatesForToday(false); }
   get todayNonHourBasedRates() {

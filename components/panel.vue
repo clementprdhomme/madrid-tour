@@ -127,11 +127,12 @@ export default {
       data.push({
         color: '#D6D6D6',
         ranges: [
-          [0, 100]
+          [0, 24]
         ]
       });
 
-      const allRatesNonHourBased = !this.poi.getRatesFor(this.selectedDay, false).length;
+      const allRatesNonHourBased = this.poi.getRatesFor(this.selectedDay, false) &&
+        !this.poi.getRatesFor(this.selectedDay, false).length;
 
       if(this.poi.alwaysFree || allRatesNonHourBased) {
         /* We add the opening hours data */
@@ -139,8 +140,8 @@ export default {
           color: green,
           ranges: []
         };
-        for(let i = 0, j = this.poi.openingHours.length; i < j; i++) {
-          openingHoursData.ranges.push(this.openingHours[i]);
+        for(let i = 0, j = this.poi.openingHours[this.selectedDay].length; i < j; i++) {
+          openingHoursData.ranges.push(this.poi.openingHours[this.selectedDay][i]);
         }
         data.push(openingHoursData);
       } else {

@@ -8,3 +8,11 @@
   &.-border { border-color: $color-6; }
   use { fill: $color-6; }
 }
+.icon-supermarket {
+  &.-border { border-color: $color-9; }
+  use { fill: $color-9; }
+}
+.icon-pharmacy {
+  &.-border { border-color: $color-10; }
+  use { fill: $color-10; }
+}

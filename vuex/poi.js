@@ -58,6 +58,12 @@ export default [
   },
 
   {
+    name: 'Votre appartement',
+    category: 'housing',
+    coords: [40.434796, -3.703645]
+  },
+
+  {
     name: 'Musée Reina Sofía',
     category: 'museum',
     coords: [40.4079123, -3.6945568999999523],
@@ -81,5 +87,41 @@ export default [
       ]
     }
   },
+
+  {
+    name: 'Carrefour',
+    category: 'supermarket',
+    coords: [40.433167, -3.703978],
+    opening_hours: [
+      [[9, 22]],
+      [[8.5, 23]],
+      [[8.5, 23]],
+      [[8.5, 23]],
+      [[8.5, 23]],
+      [[8.5, 23]],
+      [[8.5, 23]]
+    ],
+    prices: {
+      always_free: true
+    }
+  },
+
+  {
+    name: 'Pharmacie',
+    category: 'pharmacy',
+    coords: [40.434788, -3.700026],
+    opening_hours: [
+      [[0, 24]],
+      [[0, 24]],
+      [[0, 24]],
+      [[0, 24]],
+      [[0, 24]],
+      [[0, 24]],
+      [[0, 24]]
+    ],
+    prices: {
+      always_free: true
+    }
+  }
 
 ];
